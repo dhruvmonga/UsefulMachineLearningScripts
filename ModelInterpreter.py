@@ -75,7 +75,7 @@ class ModelInterpreter():
             
     def show_all(self,model_type,features,feature_names,interact_feat):
         self.plot_weights()
-        self.show_summary('linear')
+        self.show_summary(model_type)
         self.show_SHAP_PDP(features)
         self.show_SHAP_PDP_interaction(interact_feat)
         self.show_ICE_actual(features,feature_names)
