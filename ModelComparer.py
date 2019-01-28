@@ -96,9 +96,11 @@ from scipy import stats
 import pandas as pd
 from statsmodels.stats.multicomp import pairwise_tukeyhsd
 from statsmodels.stats.multicomp import MultiComparison
+import numpy as np
+from sklearn.metrics import r2_score, roc_auc_score
 
 class ModelComparer():
-    def __init__(self,models,names,X_train,y_train,folds=10):
+    def __init__(self,models,names,X_train,y_train,folds=10,scoring='r2'):
         if len(models) != len(names):
             print("Number of models must be same as number of names")
             return
@@ -107,6 +109,9 @@ class ModelComparer():
         self.X_train = X_train
         self.y_train = y_train
         self.folds = folds
+        self.score = r2_score
+        if scoring == 'roc_auc':
+            self.score = roc_auc_score
     
     def calcScores(self):
         self.results = []
@@ -118,6 +123,16 @@ class ModelComparer():
             self.results.append(cv_results)
             msg = "%s: %f (%f)" % (name, cv_results.mean(), cv_results.std())
             print(msg)
+        # add default of mean and variance
+        self.names.append('Default')
+        print("Calculating cross val score for {}".format('Default'))
+        default_results = []
+        for i in range(self.folds):
+            y_pred = np.random.normal(self.y_train.mean(),self.y_train.std(),len(self.y_train))
+            default_results.append(self.score(y_true=self.y_train,y_pred=y_pred))
+        msg = "%s: %f (%f)" % ('Default', np.array(default_results).mean(), np.array(default_results).std())
+        print(msg)
+        self.results.append(np.array(default_results))
         fig = plt.figure()
         fig.suptitle('Model Comparison')
         ax = fig.add_subplot(111)
