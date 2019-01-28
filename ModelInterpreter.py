@@ -29,7 +29,7 @@ class ModelInterpreter():
 
     def show_SHAP_PDP(self, features=[]):
         for f in features:
-            if len(f) > 1:
+            if not isinstance(f, str):
                 continue
             shap.dependence_plot(f, 
                                  self.explainer.shap_values(self.X_train), 
