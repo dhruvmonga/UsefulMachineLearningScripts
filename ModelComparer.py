@@ -1,4 +1,5 @@
-"""Learning Curve Function from: https://scikit-learn.org/stable/auto_examples/model_selection/plot_learning_curve.html"""
+# Copyright 2019, Dhruv Monga, All rights reserved.
+
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.naive_bayes import GaussianNB
@@ -7,7 +8,7 @@ from sklearn.datasets import load_digits
 from sklearn.model_selection import learning_curve
 from sklearn.model_selection import ShuffleSplit
 
-
+"""Learning Curve Function from: https://scikit-learn.org/stable/auto_examples/model_selection/plot_learning_curve.html"""
 def plot_learning_curve(estimator, title, X, y, ylim=None, cv=None,
                         n_jobs=None, train_sizes=np.linspace(.1, 1.0, 5)):
     """
@@ -100,7 +101,7 @@ import numpy as np
 from sklearn.metrics import r2_score, roc_auc_score
 
 class ModelComparer():
-    def __init__(self,models,names,X_train,y_train,folds=10,scoring='r2'):
+    def __init__(self,models,names,X_train,y_train,folds=10,scoring='r2',ltype='reg'):
         if len(models) != len(names):
             print("Number of models must be same as number of names")
             return
@@ -110,8 +111,13 @@ class ModelComparer():
         self.y_train = y_train
         self.folds = folds
         self.score = r2_score
+        self.type = ltype
         if scoring == 'roc_auc':
             self.score = roc_auc_score
+            self.type = 'cls'
+        else:
+            self.score = scoring
+            self.type = ltype
     
     def calcScores(self):
         self.results = []
@@ -128,7 +134,11 @@ class ModelComparer():
         print("Calculating cross val score for {}".format('Default'))
         default_results = []
         for i in range(self.folds):
-            y_pred = np.random.normal(self.y_train.mean(),self.y_train.std(),len(self.y_train))
+            y_pred = None
+            if self.type == 'reg':
+                y_pred = np.random.normal(self.y_train.mean(),self.y_train.std(),len(self.y_train))
+            else:
+                y_pred = np.random.choice([0, 1], size=len(self.y_train), p=[np.bincount(self.y_train)[0]/len(self.y_train), np.bincount(self.y_train)[1]/len(self.y_train)])
             default_results.append(self.score(y_true=self.y_train,y_pred=y_pred))
         msg = "%s: %f (%f)" % ('Default', np.array(default_results).mean(), np.array(default_results).std())
         print(msg)
@@ -138,6 +148,7 @@ class ModelComparer():
         ax = fig.add_subplot(111)
         plt.boxplot(self.results)
         ax.set_xticklabels(self.names)
+        plt.xticks(rotation=90)
         plt.show()
         
     def showLearningCurves(self):
@@ -166,3 +177,5 @@ class ModelComparer():
         result = mc.tukeyhsd()
         
         print(result)
+        result.plot_simultaneous()
+        plt.show()
