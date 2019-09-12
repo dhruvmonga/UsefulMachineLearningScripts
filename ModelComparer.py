@@ -129,20 +129,6 @@ class ModelComparer():
             self.results.append(cv_results)
             msg = "%s: %f (%f)" % (name, cv_results.mean(), cv_results.std())
             print(msg)
-        # add default of mean and variance
-        self.names.append('Default')
-        print("Calculating cross val score for {}".format('Default'))
-        default_results = []
-        for i in range(self.folds):
-            y_pred = None
-            if self.type == 'reg':
-                y_pred = np.random.normal(self.y_train.mean(),self.y_train.std(),len(self.y_train))
-            else:
-                y_pred = np.random.choice([0, 1], size=len(self.y_train), p=[np.bincount(self.y_train)[0]/len(self.y_train), np.bincount(self.y_train)[1]/len(self.y_train)])
-            default_results.append(self.score(y_true=self.y_train,y_pred=y_pred))
-        msg = "%s: %f (%f)" % ('Default', np.array(default_results).mean(), np.array(default_results).std())
-        print(msg)
-        self.results.append(np.array(default_results))
         fig = plt.figure()
         fig.suptitle('Model Comparison')
         ax = fig.add_subplot(111)
