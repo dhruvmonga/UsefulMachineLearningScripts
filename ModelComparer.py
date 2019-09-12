@@ -163,5 +163,3 @@ class ModelComparer():
         result = mc.tukeyhsd()
         
         print(result)
-        result.plot_simultaneous()
-        plt.show()
